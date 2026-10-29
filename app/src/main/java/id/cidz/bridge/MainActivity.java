@@ -16,54 +16,71 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
-    private EditText etUrl, etKey;
-    private TextView tvStatus, tvPermissionStatus;
+    private EditText etUrl, etKey, etTestAmount;
+    private TextView tvBadgeStatus, tvPermissionDesc, tvTestStatus, tvLogsContent, tvClearLogs;
     private Button btnSave, btnTest, btnPermission, btnBattery;
-    private SharedPreferences sp;
+    private SharedPreferences spCfg, spLogs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sp = getSharedPreferences("cidz_cfg", Context.MODE_PRIVATE);
+        spCfg = getSharedPreferences("cidz_cfg", Context.MODE_PRIVATE);
+        spLogs = getSharedPreferences("cidz_logs", Context.MODE_PRIVATE);
 
-        etUrl = findViewById(R.id.etUrl);
-        etKey = findViewById(R.id.etKey);
-        tvStatus = findViewById(R.id.tvStatus);
-        tvPermissionStatus = findViewById(R.id.tvPermissionStatus);
-        btnSave = findViewById(R.id.btnSave);
-        btnTest = findViewById(R.id.btnTest);
+        tvBadgeStatus = findViewById(R.id.tvBadgeStatus);
+        tvPermissionDesc = findViewById(R.id.tvPermissionDesc);
         btnPermission = findViewById(R.id.btnPermission);
         btnBattery = findViewById(R.id.btnBattery);
 
-        // Load saved
-        etUrl.setText(sp.getString("url", "https://pg.cidz.ai.id/webhook/dana"));
-        etKey.setText(sp.getString("key", ""));
+        etTestAmount = findViewById(R.id.etTestAmount);
+        btnTest = findViewById(R.id.btnTest);
+        tvTestStatus = findViewById(R.id.tvTestStatus);
+
+        etUrl = findViewById(R.id.etUrl);
+        etKey = findViewById(R.id.etKey);
+        btnSave = findViewById(R.id.btnSave);
+
+        tvLogsContent = findViewById(R.id.tvLogsContent);
+        tvClearLogs = findViewById(R.id.tvClearLogs);
+
+        // Load config
+        etUrl.setText(spCfg.getString("url", "https://pg.cidz.ai.id/webhook/dana"));
+        etKey.setText(spCfg.getString("key", ""));
 
         btnSave.setOnClickListener(v -> {
             String url = etUrl.getText().toString().trim();
             String key = etKey.getText().toString().trim();
             if (url.isEmpty()) {
-                Toast.makeText(this, "URL Webhook tidak boleh kosong", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "URL tidak boleh kosong", Toast.LENGTH_SHORT).show();
                 return;
             }
-            sp.edit().putString("url", url).putString("key", key).apply();
-            Toast.makeText(this, "Konfigurasi tersimpan!", Toast.LENGTH_SHORT).show();
-            updateUI();
+            spCfg.edit().putString("url", url).putString("key", key).apply();
+            Toast.makeText(this, "Konfigurasi disimpan!", Toast.LENGTH_SHORT).show();
+            renderLogs();
         });
 
         btnTest.setOnClickListener(v -> {
-            tvStatus.setText("Mengirim test webhook simulasi...");
-            HttpSender.sendNotification(this, "id.dana", "DANA Bisnis", "Pembayaran QRIS Rp 1.000 dari Pelanggan", (success, code, res) -> {
+            String amountStr = etTestAmount.getText().toString().trim();
+            if (amountStr.isEmpty()) amountStr = "1221";
+
+            tvTestStatus.setText("Mengirim simulasi Rp " + amountStr + "...");
+            String dummyTitle = "DANA Bisnis";
+            String dummyText = "Pembayaran QRIS Rp " + amountStr + " dari Pelanggan Sukses";
+
+            HttpSender.sendNotification(this, "id.dana", dummyTitle, dummyText, (success, code, res) -> {
                 runOnUiThread(() -> {
                     if (success) {
-                        tvStatus.setText("✅ Berhasil terkirim! (HTTP " + code + ")");
+                        tvTestStatus.setText("✅ Berhasil dikirim ke PG! (" + code + ")");
                     } else {
-                        tvStatus.setText("❌ Gagal: " + res + " (HTTP " + code + ")");
+                        tvTestStatus.setText("❌ Gagal: " + res + " (" + code + ")");
                     }
+                    renderLogs();
                 });
             });
         });
@@ -82,30 +99,74 @@ public class MainActivity extends Activity {
                     intent.setData(Uri.parse("package:" + packageName));
                     startActivity(intent);
                 } else {
-                    Toast.makeText(this, "Optimasi baterai sudah dinonaktifkan (Aman)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Bypass optimasi baterai sudah aktif!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+        tvClearLogs.setOnClickListener(v -> {
+            spLogs.edit().remove("history").apply();
+            renderLogs();
+            Toast.makeText(this, "Riwayat dibersihkan", Toast.LENGTH_SHORT).show();
+        });
+
         updateUI();
+        renderLogs();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updateUI();
+        renderLogs();
     }
 
     private void updateUI() {
         boolean hasPermission = isNotificationServiceEnabled();
         if (hasPermission) {
-            tvPermissionStatus.setText("Status Izin Notifikasi: ✅ AKTIF 24/7");
-            tvPermissionStatus.setTextColor(0xFF00FF88); // Neon green
+            tvBadgeStatus.setText("ACTIVE 24/7");
+            tvBadgeStatus.setBackgroundColor(0xFF238636); // Green
+            tvPermissionDesc.setText("Status: Listener aktif & siap tangkap notifikasi DANA.");
             btnPermission.setVisibility(View.GONE);
         } else {
-            tvPermissionStatus.setText("Status Izin Notifikasi: ❌ BELUM DIIZINKAN");
-            tvPermissionStatus.setTextColor(0xFFFF4444); // Red
+            tvBadgeStatus.setText("DISABLED");
+            tvBadgeStatus.setBackgroundColor(0xFFDA3633); // Red
+            tvPermissionDesc.setText("Status: Akses notifikasi belum diizinkan oleh sistem Android.");
             btnPermission.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void renderLogs() {
+        try {
+            String rawLogs = spLogs.getString("history", "[]");
+            JSONArray arr = new JSONArray(rawLogs);
+            if (arr.length() == 0) {
+                tvLogsContent.setText("Belum ada riwayat notifikasi.");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                String time = obj.optString("time", "");
+                String pkg = obj.optString("pkg", "");
+                String text = obj.optString("text", "");
+                int code = obj.optInt("code", 0);
+                boolean ok = obj.optBoolean("ok", false);
+
+                sb.append("[").append(time).append("] ")
+                  .append(ok ? "✅ " : "❌ ")
+                  .append("HTTP ").append(code).append("\n")
+                  .append("App: ").append(pkg).append("\n")
+                  .append("Data: ").append(text).append("\n");
+
+                if (i < arr.length() - 1) {
+                    sb.append("────────────────────────────\n");
+                }
+            }
+            tvLogsContent.setText(sb.toString().trim());
+        } catch (Exception e) {
+            tvLogsContent.setText("Error membaca riwayat.");
         }
     }
 

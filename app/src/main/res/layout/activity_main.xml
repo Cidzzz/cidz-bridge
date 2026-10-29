@@ -2,127 +2,261 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0D1117"
-    android:padding="20dp">
+    android:background="#0A0E14"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⚡ CIDZ BRIDGE"
-            android:textColor="#58A6FF"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Background DANA Notification Listener"
-            android:textColor="#8B949E"
-            android:textSize="13sp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginVertical="16dp"
-            android:background="#30363D" />
-
-        <TextView
-            android:id="@+id/tvPermissionStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status Izin Notifikasi: Mengecek..."
-            android:textColor="#E6EDF3"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btnPermission"
+        <!-- Header Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#238636"
-            android:text="Aktifkan Akses Notifikasi"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/btnBattery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#21262D"
-            android:text="Matikan Optimasi Baterai (Agar Awet 24/7)"
-            android:textColor="#C9D1D9" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Target Webhook URL"
-            android:textColor="#C9D1D9"
-            android:textSize="13sp" />
-
-        <EditText
-            android:id="@+id/etUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:background="#161B22"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Forwarder Secret Key (X-Forwarder-Key)"
-            android:textColor="#C9D1D9"
-            android:textSize="13sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/etKey"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="⚡ CIDZ BRIDGE"
+                    android:textColor="#58A6FF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvBadgeStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#238636"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="ONLINE"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvPermissionDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Izin Notifikasi: Mengecek..."
+                android:textColor="#8B949E"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnPermission"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:background="#238636"
+                    android:text="Aktifkan Izin"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnBattery"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="#21262D"
+                    android:text="Bypass Baterai"
+                    android:textColor="#C9D1D9"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Test PG Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="14dp"
             android:background="#161B22"
-            android:hint="Opsional / Samakan dengan admin PG"
-            android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#484F58"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <Button
-            android:id="@+id/btnSave"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🧪 TEST SIMULASI NOMINAL PG"
+                android:textColor="#C9D1D9"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etTestAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:background="#0D1117"
+                    android:hint="Nominal (contoh: 1221)"
+                    android:inputType="number"
+                    android:paddingHorizontal="12dp"
+                    android:textColor="#58A6FF"
+                    android:textColorHint="#484F58"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/btnTest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="8dp"
+                    android:background="#1F6FEB"
+                    android:paddingHorizontal="16dp"
+                    android:text="Kirim Test"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvTestStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Siap test notifikasi DANA Bisnis"
+                android:textColor="#8B949E"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Config Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="#1F6FEB"
-            android:text="Simpan Konfigurasi"
-            android:textColor="#FFFFFF" />
+            android:layout_marginTop="14dp"
+            android:background="#161B22"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <Button
-            android:id="@+id/btnTest"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️ PENGATURAN KONEKSI"
+                android:textColor="#C9D1D9"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="URL Webhook Target"
+                android:textColor="#8B949E"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etUrl"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:layout_marginTop="4dp"
+                android:background="#0D1117"
+                android:paddingHorizontal="12dp"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Forwarder Secret Key (X-Forwarder-Key)"
+                android:textColor="#8B949E"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/etKey"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:layout_marginTop="4dp"
+                android:background="#0D1117"
+                android:hint="Opsional / Samakan dengan Admin PG"
+                android:paddingHorizontal="12dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#484F58"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:background="#21262D"
+                android:text="Simpan Perubahan"
+                android:textColor="#C9D1D9"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Logs History Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#30363D"
-            android:text="Kirim Test Notifikasi ke PG"
-            android:textColor="#C9D1D9" />
+            android:layout_marginTop="14dp"
+            android:background="#161B22"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Status: Idle"
-            android:textColor="#8B949E"
-            android:textSize="13sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="📋 RIWAYAT NOTIFIKASI TERKIRIM"
+                    android:textColor="#C9D1D9"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvClearLogs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="Bersihkan"
+                    android:textColor="#58A6FF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvLogsContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#0D1117"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="4dp"
+                android:padding="12dp"
+                android:text="Belum ada riwayat notifikasi."
+                android:textColor="#8B949E"
+                android:textSize="11sp" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

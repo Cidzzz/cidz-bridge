@@ -2,12 +2,20 @@ package id.cidz.bridge;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class HttpSender {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -23,7 +31,6 @@ public class HttpSender {
 
         executor.execute(() -> {
             try {
-                // JSON payload escape
                 String json = "{"
                         + "\"package\":\"" + escapeJson(pkg) + "\","
                         + "\"title\":\"" + escapeJson(title) + "\","
@@ -50,9 +57,17 @@ public class HttpSender {
 
                 int code = conn.getResponseCode();
                 boolean ok = (code >= 200 && code < 300);
-                if (cb != null) cb.onResult(ok, code, "HTTP " + code);
+
+                // Read response body
+                String respBody = readStream(ok ? conn.getInputStream() : conn.getErrorStream());
                 conn.disconnect();
+
+                // Save to local logs (in memory SharedPreferences)
+                addLog(ctx, pkg, title, text, code, ok, respBody);
+
+                if (cb != null) cb.onResult(ok, code, respBody.isEmpty() ? ("HTTP " + code) : respBody);
             } catch (Exception e) {
+                addLog(ctx, pkg, title, text, -1, false, e.getMessage());
                 if (cb != null) cb.onResult(false, -1, e.getMessage());
             }
         });
@@ -63,7 +78,6 @@ public class HttpSender {
         String baseUrl = sp.getString("url", "https://pg.cidz.ai.id/webhook/dana");
         String key = sp.getString("key", "");
 
-        // Auto replace path to /webhook/heartbeat if URL ends with /webhook/dana
         String hbUrl = baseUrl.contains("/webhook/") 
                 ? baseUrl.substring(0, baseUrl.lastIndexOf("/webhook/")) + "/webhook/heartbeat"
                 : baseUrl + "/webhook/heartbeat";
@@ -87,12 +101,53 @@ public class HttpSender {
 
                 int code = conn.getResponseCode();
                 boolean ok = (code >= 200 && code < 300);
-                if (cb != null) cb.onResult(ok, code, "Heartbeat " + code);
                 conn.disconnect();
+                if (cb != null) cb.onResult(ok, code, "Heartbeat " + code);
             } catch (Exception e) {
                 if (cb != null) cb.onResult(false, -1, e.getMessage());
             }
         });
+    }
+
+    private static String readStream(InputStream is) {
+        if (is == null) return "";
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private static synchronized void addLog(Context ctx, String pkg, String title, String text, int code, boolean ok, String resp) {
+        try {
+            SharedPreferences sp = ctx.getSharedPreferences("cidz_logs", Context.MODE_PRIVATE);
+            String rawLogs = sp.getString("history", "[]");
+            JSONArray arr = new JSONArray(rawLogs);
+
+            JSONObject item = new JSONObject();
+            String timeStr = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+            item.put("time", timeStr);
+            item.put("pkg", pkg);
+            item.put("title", title);
+            item.put("text", text);
+            item.put("code", code);
+            item.put("ok", ok);
+            item.put("resp", resp);
+
+            // Prepend new item
+            JSONArray newArr = new JSONArray();
+            newArr.put(item);
+            for (int i = 0; i < Math.min(arr.length(), 29); i++) { // simpan max 30 log
+                newArr.put(arr.get(i));
+            }
+            sp.edit().putString("history", newArr.toString()).apply();
+        } catch (Exception ignored) {}
     }
 
     private static String escapeJson(String s) {
